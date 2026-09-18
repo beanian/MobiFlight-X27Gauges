@@ -1,0 +1,118 @@
+{
+  "$schema": "./mfdevice.schema.json",
+  "Info": {
+    "Label": "PoStepVID6606 (8x X27 gauge stepper)",
+    "Type": "X27_POSTEP_VID6606",
+    "Author": "Ian Bennett",
+    "URL": "https://github.com/beanian/MobiFlight-X27Gauges",
+    "Version": "1.0.0"
+  },
+  "Config": {
+    "Pins": [
+      "SER (data)",
+      "SCK (clock)",
+      "RCK (latch)"
+    ],
+    "Custom": {
+      "Enabled": true,
+      "Value": "280|3000"
+    }
+  },
+  "MessageTypes": [
+    {
+      "id": 1,
+      "label": "Motor 1 - angle (degrees)",
+      "description": "Needle angle for the output labelled Motor1 on the PoStep board.\n$ = 0 to 315 degrees from the zero stop, decimals allowed (1/12 degree resolution).\nUse the Interpolation modifier to map the sim value onto the dial."
+    },
+    {
+      "id": 2,
+      "label": "Motor 2 - angle (degrees)",
+      "description": "Needle angle for the output labelled Motor2 on the PoStep board.\n$ = 0 to 315 degrees from the zero stop, decimals allowed (1/12 degree resolution).\nUse the Interpolation modifier to map the sim value onto the dial."
+    },
+    {
+      "id": 3,
+      "label": "Motor 3 - angle (degrees)",
+      "description": "Needle angle for the output labelled Motor3 on the PoStep board.\n$ = 0 to 315 degrees from the zero stop, decimals allowed (1/12 degree resolution).\nUse the Interpolation modifier to map the sim value onto the dial."
+    },
+    {
+      "id": 4,
+      "label": "Motor 4 - angle (degrees)",
+      "description": "Needle angle for the output labelled Motor4 on the PoStep board.\n$ = 0 to 315 degrees from the zero stop, decimals allowed (1/12 degree resolution).\nUse the Interpolation modifier to map the sim value onto the dial."
+    },
+    {
+      "id": 5,
+      "label": "Motor 5 - angle (degrees)",
+      "description": "Needle angle for the output labelled Motor5 on the PoStep board.\n$ = 0 to 315 degrees from the zero stop, decimals allowed (1/12 degree resolution).\nUse the Interpolation modifier to map the sim value onto the dial."
+    },
+    {
+      "id": 6,
+      "label": "Motor 6 - angle (degrees)",
+      "description": "Needle angle for the output labelled Motor6 on the PoStep board.\n$ = 0 to 315 degrees from the zero stop, decimals allowed (1/12 degree resolution).\nUse the Interpolation modifier to map the sim value onto the dial."
+    },
+    {
+      "id": 7,
+      "label": "Motor 7 - angle (degrees)",
+      "description": "Needle angle for the output labelled Motor7 on the PoStep board.\n$ = 0 to 315 degrees from the zero stop, decimals allowed (1/12 degree resolution).\nUse the Interpolation modifier to map the sim value onto the dial."
+    },
+    {
+      "id": 8,
+      "label": "Motor 8 - angle (degrees)",
+      "description": "Needle angle for the output labelled Motor8 on the PoStep board.\n$ = 0 to 315 degrees from the zero stop, decimals allowed (1/12 degree resolution).\nUse the Interpolation modifier to map the sim value onto the dial."
+    },
+    {
+      "id": 11,
+      "label": "Motor 1 - raw microsteps",
+      "description": "Needle position for Motor1 in microsteps.\n$ = 0 to 3780 (12 per degree). Meant for calibration and testing."
+    },
+    {
+      "id": 12,
+      "label": "Motor 2 - raw microsteps",
+      "description": "Needle position for Motor2 in microsteps.\n$ = 0 to 3780 (12 per degree). Meant for calibration and testing."
+    },
+    {
+      "id": 13,
+      "label": "Motor 3 - raw microsteps",
+      "description": "Needle position for Motor3 in microsteps.\n$ = 0 to 3780 (12 per degree). Meant for calibration and testing."
+    },
+    {
+      "id": 14,
+      "label": "Motor 4 - raw microsteps",
+      "description": "Needle position for Motor4 in microsteps.\n$ = 0 to 3780 (12 per degree). Meant for calibration and testing."
+    },
+    {
+      "id": 15,
+      "label": "Motor 5 - raw microsteps",
+      "description": "Needle position for Motor5 in microsteps.\n$ = 0 to 3780 (12 per degree). Meant for calibration and testing."
+    },
+    {
+      "id": 16,
+      "label": "Motor 6 - raw microsteps",
+      "description": "Needle position for Motor6 in microsteps.\n$ = 0 to 3780 (12 per degree). Meant for calibration and testing."
+    },
+    {
+      "id": 17,
+      "label": "Motor 7 - raw microsteps",
+      "description": "Needle position for Motor7 in microsteps.\n$ = 0 to 3780 (12 per degree). Meant for calibration and testing."
+    },
+    {
+      "id": 18,
+      "label": "Motor 8 - raw microsteps",
+      "description": "Needle position for Motor8 in microsteps.\n$ = 0 to 3780 (12 per degree). Meant for calibration and testing."
+    },
+    {
+      "id": 20,
+      "label": "Home",
+      "description": "Drives needles into the zero stop and re-zeroes them, takes about 4 seconds.\n$ = 0 homes all motors, 1 to 8 homes that motor only.\nRuns every time this message is sent, so drive it from a value that changes when you want to home."
+    },
+    {
+      "id": 21,
+      "label": "Max speed (all boards)",
+      "description": "$ = max needle speed in degrees per second, 30 to 400. Default 280.\nOverrides the device config string until the board restarts."
+    },
+    {
+      "id": 22,
+      "label": "Acceleration (all boards)",
+      "description": "$ = acceleration in degrees per second squared, 0 = no ramp (instant full speed). Default 3000.\nOverrides the device config string until the board restarts."
+    }
+  ]
+}
