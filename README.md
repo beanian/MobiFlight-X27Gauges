@@ -44,7 +44,8 @@ To go back, flash the stock *MobiFlight Mega* firmware from the same menu.
 | 12-24 V | separate supply (not the 5 V rail) |
 
 Stepping is driven by **Timer4**, so **PWM on D6, D7 and D8 stops working** (they still work as plain
-on/off pins and as PoStep bus pins). Pick another timer with `-DX27_TIMER=` if you need those, see
+on/off pins and as PoStep bus pins; the board definition marks them non-PWM so the Connector does not
+offer them for dimming). Pick another timer with `-DX27_TIMER=` if you need those, see
 [X27Gauges_platformio.ini](X27Gauges/X27Gauges_platformio.ini): Timer1 = D11/D12, Timer3 = D2/D3/D5,
 Timer5 = D44-D46 (Timer5 is used by MobiFlight servos).
 

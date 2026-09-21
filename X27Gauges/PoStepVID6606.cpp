@@ -35,10 +35,6 @@
 #define X27_CS1            X27_CAT3(CS, X27_TIMER, 1)
 #define X27_TIMER_VECT     X27_CAT3(TIMER, X27_TIMER, _CAPT_vect)
 
-#define X27_MIN_SPEED 30  // deg/s
-#define X27_MAX_SPEED 400 // deg/s -> 208 us tick, leaves the main loop enough time with 16 needles moving
-#define X27_MAX_ACCEL 30000
-
 // ---------- state shared by all boards ----------
 static PoStepVID6606 *s_boards[X27_MAX_BOARDS];
 static uint8_t        s_numBoards = 0;
@@ -176,13 +172,17 @@ void PoStepVID6606::configureMotion(uint16_t speedDeg, uint16_t accelDeg)
         s_rampLen    = 0;
         s_rampInc[0] = 0xFFFF;
     } else {
-        s_rampLen = (uint16_t)min(60000.0f, (vMax * vMax - v0 * v0) / (2 * a));
+        // Round up: a ramp shorter than one step is still one step, so max speed stays reachable
+        s_rampLen = (uint16_t)min(60000.0f, ceil((vMax * vMax - v0 * v0) / (2 * a)));
         while ((s_rampLen >> s_rampShift) >= X27_RAMP_TABLE)
             s_rampShift++;
         for (uint8_t i = 0; i < X27_RAMP_TABLE; i++) {
             float v      = sqrt(v0 * v0 + 2 * a * (float)((uint16_t)i << s_rampShift));
             s_rampInc[i] = v >= vMax ? 0xFFFF : (uint16_t)(v / vMax * 65535.0f);
         }
+        // The entry a fully ramped motor lands on can sit a few steps short of vMax when
+        // s_rampLen is not a multiple of the table stride. Cruise must be exactly max speed.
+        s_rampInc[s_rampLen >> s_rampShift] = 0xFFFF;
     }
 
     // the table changed under any needle that is moving, restart their ramps
@@ -230,7 +230,8 @@ void PoStepVID6606::set(int16_t messageID, char *setPoint)
             home(value - 1);
         break;
     case X27_MSG_SPEED:
-        if (value > 0) configureMotion(value, s_accelDeg);
+        // clamp while still 32 bit, a plain cast would wrap 65536 to 0
+        if (value > 0) configureMotion((uint16_t)min(value, (int32_t)X27_MAX_SPEED), s_accelDeg);
         break;
     case X27_MSG_ACCEL:
         if (value >= 0) configureMotion(s_speedDeg, (uint16_t)min(value, (int32_t)X27_MAX_ACCEL));
