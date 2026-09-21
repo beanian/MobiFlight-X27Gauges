@@ -4,6 +4,12 @@ on:
     workflows: [Firmware pull request validation]
     types: [completed]
 
+# The default GITHUB_TOKEN is read-only, so name what this job needs:
+# listing the validation run's artifacts and commenting on the pull request.
+permissions:
+  actions: read
+  pull-requests: write
+
 jobs:
   artifacts-url-comments:
     name: Add artifact links to pull request
