@@ -42,6 +42,11 @@
 #define X27_MAX_BOARDS      4
 #define X27_RAMP_TABLE      128
 
+// ---------- motion limits, applied to the config string and to messages 21/22 ----------
+#define X27_MIN_SPEED 30    // deg/s
+#define X27_MAX_SPEED 400   // deg/s -> 208 us tick, leaves the main loop enough time with 16 needles moving
+#define X27_MAX_ACCEL 30000 // deg/s^2
+
 // ---------- message IDs, must match x27_postep_vid6606.device.json ----------
 enum {
     X27_MSG_STOP      = -1, // Connector stopped

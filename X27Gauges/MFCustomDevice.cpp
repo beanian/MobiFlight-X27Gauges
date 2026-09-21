@@ -93,14 +93,15 @@ void MFCustomDevice::attach(uint16_t adrPin, uint16_t adrType, uint16_t adrConfi
     }
 
     // Optional config string "<max speed deg/s>|<acceleration deg/s^2>",
-    // anything missing falls back to the build defaults
+    // anything missing falls back to the build defaults. Clamp before narrowing
+    // to 16 bit, otherwise e.g. an acceleration of 65536 would wrap to 0 = no ramp.
     uint16_t speed = X27_DEFAULT_SPEED;
     uint16_t accel = X27_DEFAULT_ACCEL;
     if (getStringFromMem(adrConfig, parameter, configFromFlash)) {
         params = strtok_r(parameter, "|", &p);
-        if (params && atoi(params) > 0) speed = atoi(params);
+        if (params && atol(params) > 0) speed = (uint16_t)min(atol(params), (long)X27_MAX_SPEED);
         params = strtok_r(NULL, "|", &p);
-        if (params && isdigit(*params)) accel = atol(params);
+        if (params && isdigit(*params)) accel = (uint16_t)min(atol(params), (long)X27_MAX_ACCEL);
     }
 
     _board = new (mem) PoStepVID6606(pins[0], pins[1], pins[2]);

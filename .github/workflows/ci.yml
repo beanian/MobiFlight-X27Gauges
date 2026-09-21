@@ -38,6 +38,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade platformio
 
+      - name: Run motion simulation
+        run: python tools/sim_motion.py
+
       - name: Run PlatformIO
         env:
           VERSION: "0.0.${{ github.event.number }}"

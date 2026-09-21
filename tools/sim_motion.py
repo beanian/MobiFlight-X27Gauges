@@ -30,12 +30,13 @@ class Motion:
         if self.accel_deg == 0 or v0 >= v_max:
             self.ramp_len = 0
         else:
-            self.ramp_len = int(min(60000.0, (v_max * v_max - v0 * v0) / (2 * a)))
+            self.ramp_len = int(min(60000.0, math.ceil((v_max * v_max - v0 * v0) / (2 * a))))
             while (self.ramp_len >> self.ramp_shift) >= RAMP_TABLE:
                 self.ramp_shift += 1
             for i in range(RAMP_TABLE):
                 v = math.sqrt(v0 * v0 + 2 * a * (i << self.ramp_shift))
                 self.ramp_inc[i] = 0xFFFF if v >= v_max else int(v / v_max * 65535.0)
+            self.ramp_inc[self.ramp_len >> self.ramp_shift] = 0xFFFF
 
 
 class Motor:
@@ -110,10 +111,20 @@ def test_full_sweep(speed, accel):
     check(min(gaps) >= 1, "two pulses in one tick")
     secs = ticks * k.tick_us / 1e6
     peak = 1e6 / (min(gaps) * k.tick_us) / STEPS_PER_DEG
-    first = 1e6 / (gaps[0] * k.tick_us) / STEPS_PER_DEG
-    last = 1e6 / (gaps[-1] * k.tick_us) / STEPS_PER_DEG
+    # the phase starts at 0, so ticks until the first pulse is the exact start speed; at the
+    # end average two gaps, below max speed the pulses alternate between 1 and 2 ticks
+    first = 1e6 / (m.step_ticks[0] * k.tick_us) / STEPS_PER_DEG
+    last = 1e6 / (sum(gaps[-2:]) / 2 * k.tick_us) / STEPS_PER_DEG
+    # Average rate between the two ramps. min(gaps) alone would hide a needle that skips
+    # a tick now and then, or one stuck below max speed on a 1-2-1-2 pulse pattern.
+    mid = m.step_ticks[k.ramp_len : len(m.step_ticks) - k.ramp_len]
+    cruise = (len(mid) - 1) / ((mid[-1] - mid[0]) * k.tick_us) * 1e6 / STEPS_PER_DEG if len(mid) > 1 else float("nan")
     print(f"  sweep 315deg @ {speed}deg/s accel {accel}: {secs:.2f}s, tick {k.tick_us}us, "
-          f"ramp {k.ramp_len} steps (shift {k.ramp_shift}), start {first:.0f} peak {peak:.0f} end {last:.0f} deg/s")
+          f"ramp {k.ramp_len} steps (shift {k.ramp_shift}), start {first:.0f} peak {peak:.0f} "
+          f"cruise {cruise:.1f} end {last:.0f} deg/s")
+    if len(mid) > 10:  # a ramp longer than half the sweep never cruises
+        at_max = 1e6 / k.tick_us / STEPS_PER_DEG  # one step per tick, the tick period is whole microseconds
+        check(abs(cruise - at_max) < 0.05, f"cruise {cruise:.1f} deg/s is below the configured {k.speed_deg} deg/s")
     if accel:
         check(first <= START_SPEED * 1.6 and last <= START_SPEED * 1.6, "ramp does not start/end slow")
 
@@ -161,9 +172,12 @@ def test_random_retarget(k, seed):
 
 
 if __name__ == "__main__":
-    for speed, accel in [(280, 3000), (280, 0), (400, 3000), (400, 300), (100, 1000), (30, 3000), (280, 30000)]:
+    # 90|30000 and 100|30000 give a computed ramp shorter than / about one step,
+    # 61|30000 is just above the start speed: max speed must be reached in every case
+    for speed, accel in [(280, 3000), (280, 0), (400, 3000), (400, 300), (100, 1000), (30, 3000), (280, 30000),
+                         (90, 30000), (100, 30000), (61, 30000), (90, 1)]:
         test_full_sweep(speed, accel)
-    for speed, accel in [(280, 3000), (280, 0), (400, 300), (280, 30000)]:
+    for speed, accel in [(280, 3000), (280, 0), (400, 300), (280, 30000), (90, 30000)]:
         k = Motion(speed, accel)
         test_short_moves(k)
         test_homing(k)
